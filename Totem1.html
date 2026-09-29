@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Totem HMCC 2 - Prioridades - Rayssa</title>
+    <style>
+        body { margin: 0; font-family: 'Arial', sans-serif; background-color: #0092D0; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        .hidden { display: none !important; }
+
+        /* TELA 1 */
+        .saudacao-preta { color: #000; font-size: 3rem; font-weight: bold; margin-bottom: 5px; text-align: center; }
+        .instrucao-azul { color: #0047AB; font-size: 1.6rem; font-weight: bold; margin-bottom: 30px; text-align: center; }
+        .bola-azul { width: 200px; height: 200px; background: #0047AB; border-radius: 50%; border: none; cursor: pointer; animation: pulse 1.5s infinite; display: block; margin: 0 auto; }
+
+        /* TELA AJUDA E MENU */
+        .card-branco { background: white; padding: 35px 25px; border-radius: 30px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .titulo-azul { color: #0047AB; font-size: 2rem; font-weight: bold; margin-bottom: 25px; }
+        .grid-botoes { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        
+        /* TODOS OS BOTÕES IGUAIS (AZUIS) */
+        .btn-opcao { background-color: #007bff; color: white; border: none; padding: 18px; border-radius: 12px; font-weight: bold; font-size: 1.1rem; cursor: pointer; text-transform: uppercase; }
+
+        @keyframes pulse { 0% { transform: scale(0.95); } 70% { transform: scale(1.05); } 100% { transform: scale(0.95); } }
+        .orelha-anim { font-size: 130px; animation: pulse 1.2s infinite; display: inline-block; }
+
+        /* TELA SENHA GI01 */
+        #t-senha { background-color: #cccccc; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; position: fixed; top:0; left:0; z-index: 100; }
+        .ficha-branca { background: white; border: 2px solid black; width: 85%; max-width: 480px; padding: 50px 20px; color: black; text-align: center; }
+        .topo-hmcc { font-weight: bold; font-size: 1.3rem; line-height: 1.2; margin-bottom: 20px; }
+        .tracejado { border-top: 2px dashed black; margin: 20px 0; }
+        .numero-gigante { font-size: 10rem; font-weight: 900; font-family: 'Arial Black', sans-serif; line-height: 1; margin: 15px 0; }
+        .nome-especialidade { color: #0047AB; font-weight: bold; font-size: 1.8rem; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+    <div id="t1">
+        <div class="saudacao-preta">Seja bem-vindo(a)</div>
+        <div class="instrucao-azul">Toque na tela para iniciar</div>
+        <button class="bola-azul" onclick="falarAjuda()"></button>
+    </div>
+
+    <div id="t2" class="card-branco hidden">
+        <h2 class="titulo-azul">Precisa de ajuda?</h2>
+        <button onclick="ativarVoz()" style="background:#5cb85c; color:white; border:none; padding:25px; border-radius:15px; font-size:2.8rem; width:100%; font-weight:bold; margin-bottom:20px; cursor:pointer;">👍 SIM</button>
+        <button class="btn-opcao" style="width:100%; font-size:1.5rem;" onclick="ir('t-lista')">Ver Opções</button>
+    </div>
+
+    <div id="t-ouvindo" class="hidden" style="text-align:center;">
+        <div class="orelha-anim">👂</div>
+        <h2 style="color: white; font-size: 2.5rem; margin-top: 20px;">Estou ouvindo...</h2>
+    </div>
+
+    <div id="t-lista" class="card-branco hidden">
+        <h2 class="titulo-azul">Selecione o serviço</h2>
+        <div class="grid-botoes">
+            <button class="btn-opcao" onclick="imprimir('Preferencial', 'PR')">Preferencial (>60 anos)</button>
+            <button class="btn-opcao" onclick="imprimir('Super Preferencial', 'SP')">Super Preferencial (>80 anos)</button>
+            <button class="btn-opcao" onclick="imprimir('Teste de orelhinha', 'TO')">Teste de orelhinha</button>
+            <button class="btn-opcao" onclick="imprimir('Gestante Centro Obstétrico', 'GO')">Gestante C.O</button>
+            <button class="btn-opcao" onclick="imprimir('Procedimento Cirúrgico', 'PC')">Procedimento Cirúrgico</button>
+            <button class="btn-opcao" onclick="imprimir('Vítima Violência Sexual', 'VVS')">Vítima Violência Sexual</button>
+        </div>
+    </div>
+
+    <div id="t-senha" class="hidden">
+        <div class="ficha-branca">
+            <div class="topo-hmcc">Hospital Municipal Carlos Chagas<br>HMCC</div>
+            <div class="tracejado"></div>
+            <div style="font-weight: bold; font-size: 1.8rem;">AGUARDE SUA SENHA</div>
+            <div id="box-numero" class="numero-gigante">--</div>
+            <div id="box-nome" class="nome-especialidade">---</div>
+            <div class="tracejado"></div>
+            <div id="box-data" style="font-weight: bold; font-size: 1.2rem;"></div>
+        </div>
+    </div>
+
+    <script>
+        const d = new Date().toLocaleDateString();
+        if(localStorage.getItem('data_t2') !== d) { localStorage.clear(); localStorage.setItem('data_t2', d); }
+
+        function ir(id) {
+            document.querySelectorAll('body > div').forEach(div => div.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function falarAjuda() {
+            ir('t2');
+            const msg = new SpeechSynthesisUtterance("Precisa de ajuda?");
+            msg.lang = 'pt-BR';
+            window.speechSynthesis.speak(msg);
+        }
+
+        function imprimir(nome, pref) {
+            let c = parseInt(localStorage.getItem('c2_'+pref)) || 1;
+            document.getElementById('box-numero').innerText = pref + c.toString().padStart(2, '0');
+            document.getElementById('box-nome').innerText = nome;
+            const agora = new Date();
+            document.getElementById('box-data').innerText = `Data: ${agora.toLocaleDateString()} - Hora: ${agora.getHours()}:${agora.getMinutes().toString().padStart(2, '0')}`;
+            localStorage.setItem('c2_'+pref, c + 1);
+            ir('t-senha');
+            setTimeout(() => location.reload(), 7000);
+        }
+
+        function ativarVoz() {
+            ir('t-ouvindo');
+            const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const rec = new Speech();
+            rec.lang = 'pt-BR';
+            rec.onresult = (e) => {
+                const f = e.results[0][0].transcript.toLowerCase();
+                if(f.includes("sessenta") || f.includes("preferencial")) imprimir('Preferencial', 'PR');
+                else if(f.includes("oitenta") || f.includes("super")) imprimir('Super Preferencial', 'SP');
+                else if(f.includes("orelhinha")) imprimir('Teste de orelhinha', 'TO');
+                else if(f.includes("gestante") || f.includes("obstétrico")) imprimir('Gestante Centro Obstétrico', 'GO');
+                else if(f.includes("cirúrgico") || f.includes("procedimento")) imprimir('Procedimento Cirúrgico', 'PC');
+                else if(f.includes("sexual") || f.includes("violência") || f.includes("vvs")) imprimir('Vítima Violência Sexual', 'VVS');
+                else {
+                    window.speechSynthesis.speak(new SpeechSynthesisUtterance("Não entendi."));
+                    setTimeout(() => ir('t2'), 2000);
+                }
+            };
+            rec.start();
+        }
+    </script>
+</body>
+</html>
